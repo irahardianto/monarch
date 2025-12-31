@@ -8,6 +8,7 @@ Monarch wraps task completion in strict, executable gates. It runs locally along
 ## Key Features
 *   **Supervisor Pattern:** Acts as a bridge between humans (Requirements) and Agents (Execution).
 *   **NFR Gates:** Ephemeral Docker containers validate code (Tier A/B/C gates).
+*   **Project Registration:** Auto-detects project stack (Go, Node, Python) and configures gates.
 *   **Protocol Translation:** Converts raw tool logs into agent-readable "Unified Error Objects".
 *   **Circuit Breaking:** Detects and blocks infinite loops in agent behavior (default 5 attempts).
 *   **MCP Integration:** Exposes "Planner" and "Builder" toolsets via Model Context Protocol.
@@ -16,3 +17,8 @@ Monarch wraps task completion in strict, executable gates. It runs locally along
 *   **Type:** Local-first, self-hosted platform.
 *   **Components:** Single Go binary (API, MCP Server, State) located in `apps/backend`, PostgreSQL + pgvector, Docker SDK for orchestration.
 *   **Interface:** Vue.js + Shadcn Dashboard located in `apps/frontend`.
+
+## Current Status (2025-12-31)
+*   Backend Core implemented (DB, Runner, API, Gates, Project).
+*   Frontend pending.
+*   MCP Integration pending.

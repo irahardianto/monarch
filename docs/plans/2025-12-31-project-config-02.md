@@ -1,6 +1,6 @@
 # Plan: Epic 2 - Project & Gate Configuration
 
-**Status:** Proposed
+**Status:** Implemented
 **Epic:** 2 (Project & Gate Config)
 **Stories:** 2.1, 2.2
 **Date:** 2025-12-31
@@ -43,7 +43,7 @@ This plan implements the Project Registration workflow and Gate Configuration sy
 
 ## **Implementation Plan**
 
-### **Task 1: HTTP API Server Scaffold**
+### **Task 1: HTTP API Server Scaffold (Completed)**
 
 **Files:**
 - Create: `apps/backend/api/server.go`
@@ -128,7 +128,7 @@ func (s *Server) routes() {
 
 ---
 
-### **Task 2: Gate Configuration Logic**
+### **Task 2: Gate Configuration Logic (Completed)**
 
 **Files:**
 - Create: `apps/backend/gates/types.go`
@@ -208,7 +208,7 @@ func DetectStack(root string) (*Config, error) {
 
 ---
 
-### **Task 3: Project Registration Feature**
+### **Task 3: Project Registration Feature (Completed)**
 
 **Files:**
 - Create: `apps/backend/project/service.go`
@@ -285,7 +285,7 @@ func (s *Service) Register(ctx context.Context, path string) (*Project, error) {
 
 ---
 
-### **Task 4: API Wiring & Main Integration**
+### **Task 4: API Wiring & Main Integration (Completed)**
 
 **Files:**
 - Modify: `apps/backend/cmd/monarch/main.go`
