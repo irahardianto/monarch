@@ -57,6 +57,22 @@ func (q *Queries) GetProject(ctx context.Context, path string) (Project, error) 
 	return i, err
 }
 
+const getSetting = `-- name: GetSetting :one
+SELECT key, value, is_encrypted, updated_at FROM settings WHERE key = $1
+`
+
+func (q *Queries) GetSetting(ctx context.Context, key string) (Setting, error) {
+	row := q.db.QueryRow(ctx, getSetting, key)
+	var i Setting
+	err := row.Scan(
+		&i.Key,
+		&i.Value,
+		&i.IsEncrypted,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getTask = `-- name: GetTask :one
 SELECT id, project_id, title, status, attempt_count, created_at FROM tasks WHERE id = $1 LIMIT 1
 `
@@ -152,5 +168,23 @@ type UpdateTaskStatusParams struct {
 
 func (q *Queries) UpdateTaskStatus(ctx context.Context, arg UpdateTaskStatusParams) error {
 	_, err := q.db.Exec(ctx, updateTaskStatus, arg.ID, arg.Status)
+	return err
+}
+
+const upsertSetting = `-- name: UpsertSetting :exec
+INSERT INTO settings (key, value, is_encrypted, updated_at)
+VALUES ($1, $2, $3, NOW())
+ON CONFLICT (key) DO UPDATE
+SET value = EXCLUDED.value, is_encrypted = EXCLUDED.is_encrypted, updated_at = NOW()
+`
+
+type UpsertSettingParams struct {
+	Key         string      `json:"key"`
+	Value       []byte      `json:"value"`
+	IsEncrypted pgtype.Bool `json:"is_encrypted"`
+}
+
+func (q *Queries) UpsertSetting(ctx context.Context, arg UpsertSettingParams) error {
+	_, err := q.db.Exec(ctx, upsertSetting, arg.Key, arg.Value, arg.IsEncrypted)
 	return err
 }

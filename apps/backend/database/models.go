@@ -14,6 +14,13 @@ type Project struct {
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
+type Setting struct {
+	Key         string             `json:"key"`
+	Value       []byte             `json:"value"`
+	IsEncrypted pgtype.Bool        `json:"is_encrypted"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+}
+
 type Task struct {
 	ID           pgtype.UUID        `json:"id"`
 	ProjectID    pgtype.UUID        `json:"project_id"`

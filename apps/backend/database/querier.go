@@ -14,11 +14,13 @@ type Querier interface {
 	CreateProject(ctx context.Context, path string) (Project, error)
 	CreateTask(ctx context.Context, arg CreateTaskParams) (Task, error)
 	GetProject(ctx context.Context, path string) (Project, error)
+	GetSetting(ctx context.Context, key string) (Setting, error)
 	GetTask(ctx context.Context, id pgtype.UUID) (Task, error)
 	IncrementTaskAttempt(ctx context.Context, id pgtype.UUID) (int32, error)
 	ListProjects(ctx context.Context) ([]Project, error)
 	ListTasks(ctx context.Context, projectID pgtype.UUID) ([]Task, error)
 	UpdateTaskStatus(ctx context.Context, arg UpdateTaskStatusParams) error
+	UpsertSetting(ctx context.Context, arg UpsertSettingParams) error
 }
 
 var _ Querier = (*Queries)(nil)

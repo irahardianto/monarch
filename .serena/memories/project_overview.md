@@ -23,3 +23,4 @@ Monarch wraps task completion in strict, executable gates. It runs locally along
 *   **Execution Engine:** Universal Docker Executor and Tool Output Parsers (Go Test, ESLint) implemented.
 *   **MCP Server:** Implemented with Planner (search/list) and Builder (claim/submit) tools using SSE transport.
 *   Frontend pending.
+*   **Planning:** Epic 5 (LLM Eval Engine) plan generated (2026-01-02).

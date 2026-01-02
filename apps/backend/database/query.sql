@@ -21,3 +21,12 @@ UPDATE tasks SET status = $2 WHERE id = $1;
 
 -- name: IncrementTaskAttempt :one
 UPDATE tasks SET attempt_count = attempt_count + 1 WHERE id = $1 RETURNING attempt_count;
+
+-- name: UpsertSetting :exec
+INSERT INTO settings (key, value, is_encrypted, updated_at)
+VALUES ($1, $2, $3, NOW())
+ON CONFLICT (key) DO UPDATE
+SET value = EXCLUDED.value, is_encrypted = EXCLUDED.is_encrypted, updated_at = NOW();
+
+-- name: GetSetting :one
+SELECT * FROM settings WHERE key = $1;
