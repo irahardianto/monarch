@@ -18,3 +18,7 @@ func NewPostgresStore(db *pgxpool.Pool) *PostgresStore {
 func (s *PostgresStore) Create(ctx context.Context, path string) (database.Project, error) {
 	return s.q.CreateProject(ctx, path)
 }
+
+func (s *PostgresStore) List(ctx context.Context) ([]database.Project, error) {
+	return s.q.ListProjects(ctx)
+}

@@ -12,7 +12,7 @@ import (
 
 func TestServer_Health(t *testing.T) {
 	cfg := &config.Config{Env: "test", Port: 8080}
-	srv := api.NewServer(cfg, nil, nil)
+	srv := api.NewServer(cfg, nil, nil, nil)
 
 	req := httptest.NewRequest("GET", "/health", nil)
 	w := httptest.NewRecorder()

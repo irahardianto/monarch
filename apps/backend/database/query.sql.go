@@ -23,7 +23,7 @@ func (q *Queries) CreateProject(ctx context.Context, path string) (Project, erro
 }
 
 const createTask = `-- name: CreateTask :one
-INSERT INTO tasks (project_id, title, status) VALUES ($1, $2, $3) RETURNING id, project_id, title, status, created_at
+INSERT INTO tasks (project_id, title, status) VALUES ($1, $2, $3) RETURNING id, project_id, title, status, attempt_count, created_at
 `
 
 type CreateTaskParams struct {
@@ -40,6 +40,7 @@ func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (Task, e
 		&i.ProjectID,
 		&i.Title,
 		&i.Status,
+		&i.AttemptCount,
 		&i.CreatedAt,
 	)
 	return i, err
@@ -56,8 +57,61 @@ func (q *Queries) GetProject(ctx context.Context, path string) (Project, error) 
 	return i, err
 }
 
+const getTask = `-- name: GetTask :one
+SELECT id, project_id, title, status, attempt_count, created_at FROM tasks WHERE id = $1 LIMIT 1
+`
+
+func (q *Queries) GetTask(ctx context.Context, id pgtype.UUID) (Task, error) {
+	row := q.db.QueryRow(ctx, getTask, id)
+	var i Task
+	err := row.Scan(
+		&i.ID,
+		&i.ProjectID,
+		&i.Title,
+		&i.Status,
+		&i.AttemptCount,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const incrementTaskAttempt = `-- name: IncrementTaskAttempt :one
+UPDATE tasks SET attempt_count = attempt_count + 1 WHERE id = $1 RETURNING attempt_count
+`
+
+func (q *Queries) IncrementTaskAttempt(ctx context.Context, id pgtype.UUID) (int32, error) {
+	row := q.db.QueryRow(ctx, incrementTaskAttempt, id)
+	var attempt_count int32
+	err := row.Scan(&attempt_count)
+	return attempt_count, err
+}
+
+const listProjects = `-- name: ListProjects :many
+SELECT id, path, created_at FROM projects ORDER BY created_at DESC
+`
+
+func (q *Queries) ListProjects(ctx context.Context) ([]Project, error) {
+	rows, err := q.db.Query(ctx, listProjects)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Project
+	for rows.Next() {
+		var i Project
+		if err := rows.Scan(&i.ID, &i.Path, &i.CreatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listTasks = `-- name: ListTasks :many
-SELECT id, project_id, title, status, created_at FROM tasks WHERE project_id = $1
+SELECT id, project_id, title, status, attempt_count, created_at FROM tasks WHERE project_id = $1
 `
 
 func (q *Queries) ListTasks(ctx context.Context, projectID pgtype.UUID) ([]Task, error) {
@@ -74,6 +128,7 @@ func (q *Queries) ListTasks(ctx context.Context, projectID pgtype.UUID) ([]Task,
 			&i.ProjectID,
 			&i.Title,
 			&i.Status,
+			&i.AttemptCount,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -84,4 +139,18 @@ func (q *Queries) ListTasks(ctx context.Context, projectID pgtype.UUID) ([]Task,
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateTaskStatus = `-- name: UpdateTaskStatus :exec
+UPDATE tasks SET status = $2 WHERE id = $1
+`
+
+type UpdateTaskStatusParams struct {
+	ID     pgtype.UUID `json:"id"`
+	Status string      `json:"status"`
+}
+
+func (q *Queries) UpdateTaskStatus(ctx context.Context, arg UpdateTaskStatusParams) error {
+	_, err := q.db.Exec(ctx, updateTaskStatus, arg.ID, arg.Status)
+	return err
 }

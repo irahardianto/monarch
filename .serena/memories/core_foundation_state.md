@@ -1,22 +1,26 @@
-# Core Foundation Implementation State (2025-12-31)
+# Core Foundation State
 
-## Completed
-- **Scaffold**: `apps/backend` module initialized, `config` package implemented. Added `cmd/monarch/main.go` and `Makefile`.
-- **Database**: `sqlc` configured with `pgx/v5`, schema defined, code generated.
-- **Runner**: `ReapZombies` implemented and integration tested. `Manager` implemented with `GetOrStart` and `IdleTimeout`.
-- **API**: HTTP Server scaffolded with `slog` logging and panic recovery middleware (`apps/backend/api`).
-- **Gates**: Configuration parser (`gates.yaml`) and stack auto-detection (Go, Node, Python) implemented (`apps/backend/gates`).
-- **Project**: Registration service implemented with path validation, Git detection, and DB persistence (`apps/backend/project`).
-- **Integration**: `main.go` wires `ProjectService`, `PostgresStore`, and `APIServer`.
-- **Background Jobs**: `RunnerManager` (Monitor) and `Reaper` wired into `main.go` startup.
+## Architecture
+- **Language:** Go 1.25+
+- **Database:** PostgreSQL + pgvector
+- **Orchestration:** Docker SDK for Go (Sidecars)
+- **API:** Chi Router + Standard Lib
+- **Agent Protocol:** MCP (Model Context Protocol) via SSE
 
-## Architecture Decisions
-- **Monorepo**: Confirmed `apps/backend` structure.
-- **Database**: Using `pgx/v5` pool and `sqlc` for type safety.
-- **Docker**: Using `github.com/docker/docker` module. Interface-based design for testability.
-- **Concurrency**: `sync.RWMutex` used for thread-safe map access in `Manager`.
-- **API**: Standard `net/http` ServeMux with custom middleware chain. Feature-based handlers.
+## Implemented Components
+1.  **Project Management:**
+    - Registration with git/stack detection.
+    - Gate parsing (.monarch/gates.yaml).
+    - Database schema for projects/tasks.
 
-## Next Steps
-- Implement MCP Server.
-- Add "Planner" toolset.
+2.  **Runner Engine:**
+    - `Executor`: Docker Exec wrapper for running commands.
+    - `Manager`: Warm container lifecycle (Start, Get, Idle Timeout).
+    - `Reaper`: Cleanup of orphaned containers on startup.
+    - `Parsers`: Fail-closed parsing for `go test` and `eslint`.
+
+3.  **Agent Interface (MCP):**
+    - `MCPServer`: Core server instance using `go-sdk`.
+    - `SSEHandler`: Transport layer bridging HTTP to MCP (via `go-sdk`).
+    - `Planner`: Tools for querying state (`list_projects`, `search_past_tasks`).
+    - `Builder`: Tools for executing tasks (`claim_task`, `submit_attempt`) with Circuit Breaker.

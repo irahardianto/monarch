@@ -12,14 +12,22 @@ import (
 
 type MockStore struct {
 	mock.Mock
+	proj database.Project
+	err  error
 }
 
 func (m *MockStore) Create(ctx context.Context, path string) (database.Project, error) {
-	args := m.Called(ctx, path)
-	if args.Get(0) == nil {
-		return database.Project{}, args.Error(1)
+	if m.err != nil {
+		return database.Project{}, m.err
 	}
-	return args.Get(0).(database.Project), args.Error(1)
+	return m.proj, nil
+}
+
+func (m *MockStore) List(ctx context.Context) ([]database.Project, error) {
+	if m.err != nil {
+		return nil, m.err
+	}
+	return []database.Project{m.proj}, nil
 }
 
 func TestRegister_InvalidPath(t *testing.T) {

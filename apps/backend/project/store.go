@@ -8,4 +8,5 @@ import (
 
 type Store interface {
 	Create(ctx context.Context, path string) (database.Project, error)
+	List(ctx context.Context) ([]database.Project, error)
 }

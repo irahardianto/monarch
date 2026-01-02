@@ -10,9 +10,12 @@ import (
 	"time"
 
 	"github.com/docker/docker/client"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/monarch-dev/monarch/api"
 	"github.com/monarch-dev/monarch/config"
 	"github.com/monarch-dev/monarch/database"
+	monarchmcp "github.com/monarch-dev/monarch/mcp"
+	"github.com/monarch-dev/monarch/mcp/tools"
 	"github.com/monarch-dev/monarch/project"
 	"github.com/monarch-dev/monarch/runner"
 )
@@ -68,9 +71,28 @@ func run() error {
 	// Initialize Services
 	projStore := project.NewPostgresStore(pool)
 	projSvc := project.NewService(projStore)
+	
+	// Initialize MCP
+	mcpServer := monarchmcp.NewServer()
+	
+	// Planner Tools
+	planner := tools.NewPlanner(projSvc)
+	planner.Register(mcpServer)
+	
+	// Builder Tools
+	// For now, runner service is nil or needs implementation.
+	// We pass nil as placeholder or simple executor wrapper if available.
+	// But main.go shouldn't be too complex.
+	builderStore := database.New(pool)
+	builder := tools.NewBuilder(builderStore, nil) // runner service is nil for now
+	builder.Register(mcpServer)
+
+	sseServer := mcp.NewSSEHandler(func(r *http.Request) *mcp.Server {
+		return mcpServer
+	}, nil)
 
 	// Initialize Server
-	srv := api.NewServer(cfg, pool, projSvc)
+	srv := api.NewServer(cfg, pool, projSvc, sseServer)
 
 	fmt.Printf("Monarch Supervisor starting on port %d [%s]\n", cfg.Port, cfg.Env)
 

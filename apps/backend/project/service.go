@@ -53,3 +53,7 @@ func (s *Service) Register(ctx context.Context, path string) (*Project, error) {
 		Config:  config,
 	}, nil
 }
+
+func (s *Service) List(ctx context.Context) ([]database.Project, error) {
+	return s.store.List(ctx)
+}

@@ -16,6 +16,10 @@ func (s *Server) routes() {
 	if s.projSvc != nil {
 		s.mux.HandleFunc("POST /projects", s.projSvc.RegisterHandler)
 	}
+
+	if s.sse != nil {
+		s.mux.Handle("/mcp/sse", s.sse)
+	}
 }
 
 func (s *Server) logger(next http.Handler) http.Handler {

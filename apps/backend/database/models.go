@@ -15,9 +15,10 @@ type Project struct {
 }
 
 type Task struct {
-	ID        pgtype.UUID        `json:"id"`
-	ProjectID pgtype.UUID        `json:"project_id"`
-	Title     string             `json:"title"`
-	Status    string             `json:"status"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	ID           pgtype.UUID        `json:"id"`
+	ProjectID    pgtype.UUID        `json:"project_id"`
+	Title        string             `json:"title"`
+	Status       string             `json:"status"`
+	AttemptCount int32              `json:"attempt_count"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
 }
